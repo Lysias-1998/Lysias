@@ -7,8 +7,8 @@
 
   <section|Mechanism>
 
-  The pattern match header in LLVM project seems easy to use. Considaring the
-  code:
+  The pattern matching header in the LLVM project appears to be
+  user-friendly. Consider the following code:
 
   <\cpp-code>
     \ \ llvm::PreservedAnalyses run(llvm::Function &F,
@@ -51,7 +51,8 @@
     \ \ }
   </cpp-code>
 
-  We need to figure out what <cpp|match>, <cpp|m_Add>, and <cpp|m_Value> do.
+  In this code, we need to understand the roles of the <cpp|match>,
+  <cpp|m_Add>, and <cpp|m_Value> functions.
 
   <subsection|<cpp|match>>
 
@@ -143,13 +144,15 @@
 
   This is what top level match function eventually calls.
 
-  Note that every LLVM Value has a unique enum number that can be used to
-  determine its concrete class, which is defined in
-  <cpp|llvm/include/llvm/IR/Value.def>. Through it, <cpp|BinaryOp_match> can
-  directly tell whether the input value is a add instruction.
+  It is important to note that every LLVM Value has a unique enum number that
+  can be used to determine its concrete class. This enum is defined in the
+  header file <cpp|llvm/include/llvm/IR/Value.def>. By using this enum, the
+  <cpp|BinaryOp_match> function can directly determine whether the input
+  value is an add instruction.
 
-  What is the type of L and R in the code? According to their usage in the
-  code, they must be some classes that have method <cpp|match> too.
+  What are the types of L and R in the code? Based on their usage in the
+  code, it can be inferred that they must be classes that also have a
+  <cpp|match> method.
 
   <subsection|<cpp|m_Value>>
 
@@ -157,8 +160,8 @@
     inline bind_ty\<less\>Value\<gtr\> m_Value(Value *&V) { return V; }
   </cpp-code>
 
-  Like <cpp|m_Add>, <cpp|m_Value> is a wraper function that returns a
-  structure which has a match method.
+  Similar to <cpp|m_Add>, <cpp|m_Value> is a wrapper function that returns a
+  structure with a match method.
 
   <subsubsection|<cpp|bind_ty>>
 
@@ -190,8 +193,8 @@
     };
   </cpp-code>
 
-  It keeps a reference to a pointer after construction. Populates that
-  pointer when given Class is matched.
+  It maintains a reference to a pointer after construction and populates that
+  pointer when the given class is matched.
 </body>
 
 <\initial>
@@ -202,21 +205,41 @@
 
 <\references>
   <\collection>
-    <associate|auto-1|<tuple|1|1|..\\..\\..\\AppData\\Roaming\\TeXmacs\\texts\\scratch\\no_name_2.tm>>
-    <associate|auto-2|<tuple|1.1|?|..\\..\\..\\AppData\\Roaming\\TeXmacs\\texts\\scratch\\no_name_2.tm>>
-    <associate|auto-3|<tuple|1.2|?|..\\..\\..\\AppData\\Roaming\\TeXmacs\\texts\\scratch\\no_name_2.tm>>
-    <associate|auto-4|<tuple|1.2.1|?|..\\..\\..\\AppData\\Roaming\\TeXmacs\\texts\\scratch\\no_name_2.tm>>
-    <associate|auto-5|<tuple|1.3|?|..\\..\\..\\AppData\\Roaming\\TeXmacs\\texts\\scratch\\no_name_2.tm>>
-    <associate|auto-6|<tuple|1.3.1|?|..\\..\\..\\AppData\\Roaming\\TeXmacs\\texts\\scratch\\no_name_2.tm>>
+    <associate|auto-1|<tuple|1|1>>
+    <associate|auto-2|<tuple|1.1|1>>
+    <associate|auto-3|<tuple|1.2|1>>
+    <associate|auto-4|<tuple|1.2.1|1>>
+    <associate|auto-5|<tuple|1.3|2>>
+    <associate|auto-6|<tuple|1.3.1|2>>
   </collection>
 </references>
 
 <\auxiliary>
   <\collection>
     <\associate|toc>
-      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|1<space|2spc>>
+      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|1<space|2spc>Mechanism>
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-1><vspace|0.5fn>
+
+      <with|par-left|<quote|1tab>|1.1<space|2spc><with|mode|<quote|prog>|prog-language|<quote|cpp>|font-family|<quote|rm>|match>
+      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-2>>
+
+      <with|par-left|<quote|1tab>|1.2<space|2spc><with|mode|<quote|prog>|prog-language|<quote|cpp>|font-family|<quote|rm>|m_Add>
+      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-3>>
+
+      <with|par-left|<quote|2tab>|1.2.1<space|2spc><with|mode|<quote|prog>|prog-language|<quote|cpp>|font-family|<quote|rm>|BinaryOp_match>
+      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-4>>
+
+      <with|par-left|<quote|1tab>|1.3<space|2spc><with|mode|<quote|prog>|prog-language|<quote|cpp>|font-family|<quote|rm>|m_Value>
+      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-5>>
+
+      <with|par-left|<quote|2tab>|1.3.1<space|2spc><with|mode|<quote|prog>|prog-language|<quote|cpp>|font-family|<quote|rm>|bind_ty>
+      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-6>>
     </associate>
   </collection>
 </auxiliary>
