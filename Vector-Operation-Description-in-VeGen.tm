@@ -163,6 +163,46 @@
   of <code*|match> objects, which capture the input and output values in the
   original code (the code to be vectorized).
 
+  For example, Operation17's match method is shown below. If the value has a
+  64-bit width and is a zero extension of another 32-bit value tmp0, then the
+  noncommutative operation from tmp0 to value is pushed as a match to the
+  match list.
+
+  <\cpp>
+    class : public Operation {
+
+    \ \ bool match(Value *V, SmallVectorImpl\<Match\> &Matches) const
+    override {
+
+    \ \ \ \ Value *tmp0;
+
+    \ \ \ \ bool Matched = hasBitWidth(V, 64) &&
+
+    \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ PatternMatch::match(V,
+    m_ZExt(m_Value(tmp0))) &&
+
+    \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ hasBitWidth(tmp0, 32);
+
+    \ \ \ \ if (Matched)
+
+    \ \ \ \ \ \ Matches.push_back({false,
+
+    \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ // matched live ins
+
+    \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {tmp0},
+
+    \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ // the matched value
+    itself
+
+    \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ V});
+
+    \ \ \ \ return Matched;
+
+    \ \ }
+
+    } Operation17;
+  </cpp>
+
   <subsection|BoundOperation>
 
   <\cpp>
