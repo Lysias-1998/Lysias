@@ -45,7 +45,38 @@
   contains the type and constant uniquing tables, which are necessary for
   programmatically constructing an IR module.
 
-  <subsection|>
+  <subsection|Block and Condition>
+
+  Blocks and conditions are closely related. A block is executed under a
+  certain condition, and a condition can have a block (in a control flow
+  graph) that is executed when the condition is met. We can freely decide
+  which code is executed under which condition, as long as the condition is
+  represented by a compiler-understandable predicate combined using the
+  logical operators \Pand\Q and \Por\Q.
+
+  <subsection|ConditionEmitter>
+
+  The ConditionEmitter is responsible for emitting the actual LLVM IR
+  expression that computes the condition. This expression is used in the
+  BlockBuilder as the IR branch condition.
+
+  <subsection|getBlockFor>
+
+  This function takes a control condition as input and returns a basic block
+  that belongs to a valid control flow graph (CFG) constructed based on the
+  input condition. The function implements a recursive graph algorithm that
+  traverses the control condition and recurs on the parent of the And
+  condition and the CommonC of the Or condition. It uses two lookup tables,
+  one for recording active conditions and the other for recording semi-active
+  conditions.
+
+  <subsubsection|Active Condition>
+
+  <subsubsection|Semi-Active Condition>
+
+  \;
+
+  \;
 </body>
 
 <\initial>
@@ -58,8 +89,12 @@
   <\collection>
     <associate|auto-1|<tuple|1|1>>
     <associate|auto-2|<tuple|2|1>>
-    <associate|auto-3|<tuple|2.1|?>>
-    <associate|auto-4|<tuple|2.2|?>>
+    <associate|auto-3|<tuple|2.1|1>>
+    <associate|auto-4|<tuple|2.2|1>>
+    <associate|auto-5|<tuple|2.3|1>>
+    <associate|auto-6|<tuple|2.4|1>>
+    <associate|auto-7|<tuple|2.4.1|?>>
+    <associate|auto-8|<tuple|2.4.2|?>>
   </collection>
 </references>
 
@@ -70,9 +105,25 @@
       Builder> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-1><vspace|0.5fn>
 
-      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|2<space|2spc>Test
-      Block Builder> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|2<space|2spc>Block
+      Builder> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-2><vspace|0.5fn>
+
+      <with|par-left|<quote|1tab>|2.1<space|2spc>Test
+      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-3>>
+
+      <with|par-left|<quote|1tab>|2.2<space|2spc>Block and Condition
+      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-4>>
+
+      <with|par-left|<quote|1tab>|2.3<space|2spc>ConditionEmitter
+      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-5>>
+
+      <with|par-left|<quote|1tab>|2.4<space|2spc>getBlockFor
+      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-6>>
     </associate>
   </collection>
 </auxiliary>
