@@ -55,37 +55,37 @@
 
   <subsection|computeOperandPacks>
 
-  This step consists of two sub-steps: compute and canonicalize. In general,
-  the compute step collects matched values into an array of values, primarily
-  using a structure called <code*|OperandPack>. The canonicalize step wraps
-  the <code*|OperandPack> with a C++ unique pointer and uses a map to ensure
-  uniqueness.
-
-  <subsubsection|computeOperandPacksForGeneral>
-
-  <subsubsection|computeOperandPacksForLoad>
-
-  <subsubsection|computeOperandPacksForStore>
-
-  <subsubsection|computeOperandPacksForPhi>
+  This step has two sub-steps: compute and canonicalize. The compute sub-step
+  gathers matched values into an array, mainly using a structure named
+  OperandPack. This structure stores the vector type and the producers of the
+  operand. The canonicalize sub-step wraps the OperandPack with a unique
+  pointer and uses a map to guarantee uniqueness.
 
   <subsection|computeOrderedValues>
 
-  This step performs various tasks. For a general pack, it checks
-  the<nbsp><code*|Matches><nbsp>and filters out the unmatched operands,
-  setting them to<nbsp><code*|null>. For Load, Store, Phi, GEP, and Cmp, it
-  simply copies values from the vector pack variants' own data structure
-  to<nbsp><code*|OrderedValues>, creating a starting point for later
-  processing.
-
-  Reduction has only one value, and Gamma places only Phi nodes contained in
-  it to the <code*|OrderedValues>.
+  For a general pack, it checks the <code*|Matches> and filters out the
+  unmatched operands, setting them to <code*|null>. For Load, Store, Phi,
+  GEP, and Cmp, it simply copies values from the vector pack variants' own
+  data structure to <code*|OrderedValues>, creating a starting point for
+  later processing. Reduction has only one value, and Gamma places only Phi
+  nodes contained in it to the <code*|OrderedValues>.
 
   <subsection|computeCost>
 
   This step is self-contained. The cost is either read from an intrinsic
   guide or estimated using LLVM <code*|TargetTransformInfo> (primarily for
   load and store).
+
+  <section|Vector Pack Context>
+
+  A vector pack context is a data structure that maintains a bidirectional
+  map between values and integers, enabling the use of a bitmap to record a
+  set of values. It is an intra-function analysis.
+
+  <section|Vector Pack Set>
+
+  A vector pack set is an abstraction that manages a set of compatible vector
+  packs and is responsible for lowering a set of packs to LLVM IR.
 </body>
 
 <\initial>
@@ -100,12 +100,10 @@
     <associate|auto-10|<tuple|2.8|1>>
     <associate|auto-11|<tuple|3|1>>
     <associate|auto-12|<tuple|3.1|1>>
-    <associate|auto-13|<tuple|3.1.1|2>>
-    <associate|auto-14|<tuple|3.1.2|2>>
-    <associate|auto-15|<tuple|3.1.3|2>>
-    <associate|auto-16|<tuple|3.1.4|2>>
-    <associate|auto-17|<tuple|3.2|2>>
-    <associate|auto-18|<tuple|3.3|2>>
+    <associate|auto-13|<tuple|3.2|2>>
+    <associate|auto-14|<tuple|3.3|2>>
+    <associate|auto-15|<tuple|4|2>>
+    <associate|auto-16|<tuple|5|?>>
     <associate|auto-2|<tuple|2|1>>
     <associate|auto-3|<tuple|2.1|1>>
     <associate|auto-4|<tuple|2.2|1>>
@@ -168,29 +166,17 @@
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-12>>
 
-      <with|par-left|<quote|2tab>|3.1.1<space|2spc>computeOperandPacksForGeneral
+      <with|par-left|<quote|1tab>|3.2<space|2spc>computeOrderedValues
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-13>>
 
-      <with|par-left|<quote|2tab>|3.1.2<space|2spc>computeOperandPacksForLoad
+      <with|par-left|<quote|1tab>|3.3<space|2spc>computeCost
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-14>>
 
-      <with|par-left|<quote|2tab>|3.1.3<space|2spc>computeOperandPacksForStore
-      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-15>>
-
-      <with|par-left|<quote|2tab>|3.1.4<space|2spc>computeOperandPacksForPhi
-      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-16>>
-
-      <with|par-left|<quote|1tab>|3.2<space|2spc>computeOrderedValues
-      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-17>>
-
-      <with|par-left|<quote|1tab>|3.3<space|2spc>computeCost
-      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-18>>
+      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|4<space|2spc>Vector
+      Pack Set> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-15><vspace|0.5fn>
     </associate>
   </collection>
 </auxiliary>
