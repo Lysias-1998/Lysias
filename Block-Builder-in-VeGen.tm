@@ -70,11 +70,12 @@
   one for recording active conditions and the other for recording semi-active
   conditions.
 
+  ActiveConds maps a condition to a basic block, while SemiActiveConds maps a
+  condition to a set of conditions.
+
   <subsubsection|Active Condition>
 
   <subsubsection|Semi-Active Condition>
-
-  \;
 
   \;
 </body>
@@ -93,8 +94,8 @@
     <associate|auto-4|<tuple|2.2|1>>
     <associate|auto-5|<tuple|2.3|1>>
     <associate|auto-6|<tuple|2.4|1>>
-    <associate|auto-7|<tuple|2.4.1|?>>
-    <associate|auto-8|<tuple|2.4.2|?>>
+    <associate|auto-7|<tuple|2.4.1|2>>
+    <associate|auto-8|<tuple|2.4.2|2>>
   </collection>
 </references>
 
@@ -124,6 +125,14 @@
       <with|par-left|<quote|1tab>|2.4<space|2spc>getBlockFor
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-6>>
+
+      <with|par-left|<quote|2tab>|2.4.1<space|2spc>Active Condition
+      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-7>>
+
+      <with|par-left|<quote|2tab>|2.4.2<space|2spc>Semi-Active Condition
+      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-8>>
     </associate>
   </collection>
 </auxiliary>
