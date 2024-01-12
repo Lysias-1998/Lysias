@@ -53,12 +53,23 @@
 
   <subsubsection|isSafeToFuse>
 
-  To fuse, the loops should be concrol equivalent, in same loop level,
-  independent (having no common instructions)
+  To fuse, the loops should be control-equivalent, in the same loop level,
+  independent (two loops are independent if neither has any common
+  instructions with the other's dependent instructions) and having the same
+  trip counts. Moreover, their parents should be safe to fuse.
 
   <subsubsection|isSafeToCoIterate>
 
-  <subsubsection|>
+  Loops that execute under different control predicates or have different
+  trip counts cannot be fused, but they can become co-iterate if they are
+  independent of each other. The difference in control can be resolved in the
+  loop body by using any control statement, and the difference in trip count
+  is also a form of control that depends on the loop variable. Therefore, the
+  only prerequisite left is the independence of the loop body.
+
+  <subsubsection|fuse>
+
+  \;
 
   <section|LoopUnrolling>
 
