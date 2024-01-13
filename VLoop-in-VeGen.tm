@@ -69,9 +69,34 @@
 
   <subsubsection|fuse>
 
-  \;
+  Fuse is a method of VLoopInfo. First of all, we need to fuse loops in a
+  top-down manner, that is, merge two loops only when their parents are
+  merged. For two loops VL2 and VL1, we try to fuse VL2 into VL1.\ 
+
+  It is worth noticing that in VeGen, there is no clear separation between
+  transform pass and analyze pass. I think this causes many analysis results
+  to go into data structures that hold IR, making context, analysis, and LLVM
+  IR jam together.
+
+  For example, VLoop defined by VeGen contains not only a reference to LLVM
+  loop and instructions, but also holds dependent analysis results as bit
+  vectors for instructions in the loop and instructions the loop depends on.
+  When fusing two loops, these analyses are updated with fusing. This again
+  makes me think that LLVM project has a clear design.
+
+  After fusing, VL2 is added to the deleted loops of VLoopInfo, and erased
+  from the common parent's subloops.
+
+  <subsubsection|coiterate>
+
+  VLoopInfo uses an EquivalenceClasses (union-find) ADT to store co-iterated
+  loops.
+
+  Coiteration operates on the leaders of the EquivalenceClasses.
 
   <section|LoopUnrolling>
+
+  \;
 
   <section|UnrollFactor>
 
@@ -88,15 +113,17 @@
 <\references>
   <\collection>
     <associate|auto-1|<tuple|1|1>>
-    <associate|auto-10|<tuple|4|1>>
+    <associate|auto-10|<tuple|3|2>>
+    <associate|auto-11|<tuple|4|2>>
+    <associate|auto-12|<tuple|4|?>>
     <associate|auto-2|<tuple|2|1>>
     <associate|auto-3|<tuple|2.1|1>>
     <associate|auto-4|<tuple|2.2|1>>
     <associate|auto-5|<tuple|2.2.1|1>>
     <associate|auto-6|<tuple|2.2.2|1>>
     <associate|auto-7|<tuple|2.2.3|1>>
-    <associate|auto-8|<tuple|2.2.4|1>>
-    <associate|auto-9|<tuple|3|1>>
+    <associate|auto-8|<tuple|2.2.4|2>>
+    <associate|auto-9|<tuple|2.2.5|2>>
   </collection>
 </references>
 
@@ -131,17 +158,21 @@
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-7>>
 
-      <with|par-left|<quote|2tab>|2.2.4<space|2spc>
+      <with|par-left|<quote|2tab>|2.2.4<space|2spc>fuse
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-8>>
 
+      <with|par-left|<quote|2tab>|2.2.5<space|2spc>coiterate
+      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-9>>
+
       <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|3<space|2spc>LoopUnrolling>
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-9><vspace|0.5fn>
+      <no-break><pageref|auto-10><vspace|0.5fn>
 
       <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|4<space|2spc>UnrollFactor>
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-10><vspace|0.5fn>
+      <no-break><pageref|auto-11><vspace|0.5fn>
     </associate>
   </collection>
 </auxiliary>
