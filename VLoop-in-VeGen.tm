@@ -113,19 +113,125 @@
   In VeGen, needToInsertPhisForLCSSA checks all the instructions outside the
   loop. If any outside loop instruction has an operand which is defined in a
   loop containing the loop we are checking, then this loop needs to insert
-  phis for LCSSA.
+  phis for LCSSA. Note that basic blocks cannot nest, but loops can.
 
   <subsection|simplifyLoopAfterUnroll2>
 
-  \;
-
   <subsection|UnrollLoopWithVMap>
 
-  <subsubsection|LoopUnrollResult Unmodified>
+  <subsubsection|LoopUnrollResult & UnrollLoopOptions>
+
+  LLVM defines an enum class called LoopUnrollResult, which has three
+  possible values: Unmodified, PartiallyUnrolled, and FullyUnrolled.
+  Unmodified means that the loop was not modified by the unrolling process.
+  VeGen will not unroll the loop in some situations, such as when the loop
+  has no pre-header, when the loop has more than one latch block, when the
+  loop is not safe to clone (loops with indirect branches cannot be cloned),
+  or when the loop header has its address taken (there are any uses of this
+  basic block other than direct branches, switches, etc. to it).
+
+  LLVM also defines a struct called UnrollLoopOptions, which contains several
+  member variables that specify various options for unrolling loops. The
+  following member variables are used by VeGen: TripCount, Count, PeelCount,
+  TripMultiple, AllowRuntime, UnrollRemainder, ForgetAllSCEV, PreserveCondBr,
+  and PreserveOnlyFirst. Their meanings are as follows:
+
+  <\itemize-arrow>
+    <item>Count: The number of times to unroll the loop. A value of 0 means
+    to use the default heuristic.
+
+    <item>TripCount: The number of iterations that the loop will execute. A
+    value of 0 means unknown.
+
+    <item>AllowRuntime: A flag that indicates whether to generate code that
+    can handle loops with unknown trip counts at runtime.
+
+    <item>PreserveCondBr: A flag that indicates whether to preserve the
+    conditional branch of the loop latch.
+
+    <item>PreserveOnlyFirst: A flag that indicates whether to preserve only
+    the first loop exit and remove the others.
+
+    <item>TripMultiple: The largest constant divisor of the trip count of the
+    loop. The actual trip count is always a multiple of it. The trip multiple
+    is useful for loop transformations such as unrolling, peeling, or
+    vectorization, as it indicates how many iterations can be executed
+    without affecting the loop semantics. For instance, if a loop has a trip
+    multiple of 4, then it can be unrolled by a factor of 4 without changing
+    the loop behavior. However, if the loop has a trip multiple of 1, then
+    unrolling by any factor would require additional checks or padding to
+    preserve the loop semantics. A value of 0 means unknown.
+
+    <item>PeelCount: The number of iterations to peel off before unrolling
+    the loop. A value of 0 means to use the default heuristic.
+
+    <item>UnrollRemainder: A flag that indicates whether to unroll the
+    remainder loop.
+
+    <item>ForgetAllSCEV: A flag that indicates whether to forget all the SCEV
+    information about the loop after unrolling. SCEV stands for Scalar
+    Evolution, which is a way of analyzing the values of scalar expressions
+    in loops.
+  </itemize-arrow>
+
+  <subsubsection|Trip Count>
+
+  If Count is equal to TripCount, then the loop control is eliminated
+  altogether, which results in a FullyUnrolled loop.
+
+  <subsubsection|Peel Loop>
+
+  <\cpp>
+    preheader:
+
+    \ \ br label %header
+
+    header: ; Loop header
+
+    \ \ %i = phi i64 [ 0, %preheader ], [ %next, %latch ]
+
+    \ \ %p = getelementptr @A, 0, %i
+
+    \ \ %a = load float* %p
+
+    latch: ; Loop latch
+
+    \ \ %next = add i64 %i, 1
+
+    \ \ %cmp = icmp slt %next, %N
+
+    \ \ br i1 %cmp, label %header, label %exit
+  </cpp>
+
+  A loop is a subset of nodes from the control-flow graph with the following
+  properties:
+
+  <\itemize-dot>
+    <item>The induced subgraph is strongly connected (every node is reachable
+    from all others).
+
+    <item>All edges from outside the subset into the subset point to the same
+    node, called the Header.
+
+    <item>The loop is the maximum subset with these properties.
+  </itemize-dot>
+
+  The PreHeader is a non-loop node that has an edge to the Header. It
+  dominates the loop without itself being part of the loop. The Latch is a
+  loop node that has an edge to the Header. A backedge is an edge from a
+  Latch to the Header.
+
+  <subsubsection|UnrollRuntimeLoopRemainder>
+
+  \;
 
   <section|UnrollFactor>
 
-  \;
+  <subsection|computeUnrollFactor>
+
+  <subsection|unrollLoops>
+
+  <subsection|getSeeds>
 </body>
 
 <\initial>
@@ -142,9 +248,16 @@
     <associate|auto-11|<tuple|3.1|2>>
     <associate|auto-12|<tuple|3.2|2>>
     <associate|auto-13|<tuple|3.3|2>>
-    <associate|auto-14|<tuple|3.3.1|?>>
-    <associate|auto-15|<tuple|4|?>>
+    <associate|auto-14|<tuple|3.3.1|2>>
+    <associate|auto-15|<tuple|3.3.2|3>>
+    <associate|auto-16|<tuple|3.3.3|3>>
+    <associate|auto-17|<tuple|3.3.4|?>>
+    <associate|auto-18|<tuple|4|?>>
+    <associate|auto-19|<tuple|4.1|?>>
     <associate|auto-2|<tuple|2|1>>
+    <associate|auto-20|<tuple|4.2|?>>
+    <associate|auto-21|<tuple|4.3|?>>
+    <associate|auto-24|<tuple|4.5|?>>
     <associate|auto-3|<tuple|2.1|1>>
     <associate|auto-4|<tuple|2.2|1>>
     <associate|auto-5|<tuple|2.2.1|1>>
@@ -202,13 +315,25 @@
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-11>>
 
-      <with|par-left|<quote|1tab>|3.2<space|2spc>UnrollLoopWithVMap
+      <with|par-left|<quote|1tab>|3.2<space|2spc>simplifyLoopAfterUnroll2
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-12>>
 
+      <with|par-left|<quote|1tab>|3.3<space|2spc>UnrollLoopWithVMap
+      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-13>>
+
+      <with|par-left|<quote|2tab>|3.3.1<space|2spc>LoopUnrollResult &
+      UnrollLoopOptions <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-14>>
+
+      <with|par-left|<quote|2tab>|3.3.2<space|2spc>Trip Count
+      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-15>>
+
       <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|4<space|2spc>UnrollFactor>
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-13><vspace|0.5fn>
+      <no-break><pageref|auto-16><vspace|0.5fn>
     </associate>
   </collection>
 </auxiliary>
