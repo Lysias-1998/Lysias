@@ -86,6 +86,48 @@
 
   A vector pack set is an abstraction that manages a set of compatible vector
   packs and is responsible for lowering a set of packs to LLVM IR.
+
+  <page-break>
+
+  <section|Packer>
+
+  <subsection|Load & Store>
+
+  Consecutive loads need to be packed into a load pack, and consecutive
+  stores need to be packed into a store pack. VeGen defines AccessLayoutInfo
+  to store the analysis results of consecutive memory accesses. It groups a
+  bunch of consecutive accesses into a group, records their offsets from the
+  lowest address access, and defines the lowest access instruction as the
+  leader of the group.
+
+  <subsection|Reverse Post Ordering>
+
+  VeGen maintains the reverse post-order traversal of basic blocks within a
+  function using a mapping from LLVM BasicBlock to an unsigned integer,
+  denoted as BlockOrdering.
+
+  <subsection|Methods>
+
+  <subsubsection|checkIndependence>
+
+  This function determines whether an instruction is independent of the
+  elements in a bit vector that depends on another bit vector. It assumes
+  that every instruction has a scalar id in the vector pack context and that
+  a set of instructions can be represented by a bit vector. A bit vector can
+  map an integer to a boolean value. Therefore, the dependency question is
+  equivalent to some set operations. Given the id of an instruction, we check
+  whether the id belongs to the elements or their dependencies, and whether
+  the dependencies of the instruction (according to the Global Dependence
+  Analysis results) intersect with the elements. If all these conditions are
+  true, then the computation of the elements cannot affect the instruction.
+
+  <subsubsection|isCompatible>
+
+  <subsubsection|canSpeculateAt & findSpeculationCond>
+
+  <subsubsection|matchSecondaryInsts>
+
+  \;
 </body>
 
 <\initial>
@@ -99,12 +141,21 @@
     <associate|auto-1|<tuple|1|1>>
     <associate|auto-10|<tuple|2.8|1>>
     <associate|auto-11|<tuple|3|1>>
-    <associate|auto-12|<tuple|3.1|1>>
+    <associate|auto-12|<tuple|3.1|2>>
     <associate|auto-13|<tuple|3.2|2>>
     <associate|auto-14|<tuple|3.3|2>>
     <associate|auto-15|<tuple|4|2>>
-    <associate|auto-16|<tuple|5|?>>
+    <associate|auto-16|<tuple|5|2>>
+    <associate|auto-17|<tuple|6|3>>
+    <associate|auto-18|<tuple|6.1|3>>
+    <associate|auto-19|<tuple|6.2|3>>
     <associate|auto-2|<tuple|2|1>>
+    <associate|auto-20|<tuple|6.3|3>>
+    <associate|auto-21|<tuple|6.3.1|?>>
+    <associate|auto-22|<tuple|6.3.2|?>>
+    <associate|auto-23|<tuple|6.3.3|?>>
+    <associate|auto-24|<tuple|6.3.4|?>>
+    <associate|auto-25|<tuple|6.4.3|?>>
     <associate|auto-3|<tuple|2.1|1>>
     <associate|auto-4|<tuple|2.2|1>>
     <associate|auto-5|<tuple|2.3|1>>
@@ -175,8 +226,28 @@
       <no-break><pageref|auto-14>>
 
       <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|4<space|2spc>Vector
-      Pack Set> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      Pack Context> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-15><vspace|0.5fn>
+
+      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|5<space|2spc>Vector
+      Pack Set> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-16><vspace|0.5fn>
+
+      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|6<space|2spc>Packer>
+      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-17><vspace|0.5fn>
+
+      <with|par-left|<quote|1tab>|6.1<space|2spc>Load & Store
+      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-18>>
+
+      <with|par-left|<quote|1tab>|6.2<space|2spc>Reverse Post Ordering
+      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-19>>
+
+      <with|par-left|<quote|1tab>|6.3<space|2spc>The Big Packer
+      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-20>>
     </associate>
   </collection>
 </auxiliary>
