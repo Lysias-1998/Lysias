@@ -91,6 +91,10 @@
 
   <section|Packer>
 
+  <subsection|Packer Construction>
+
+  \;
+
   <subsection|Load & Store>
 
   Consecutive loads need to be packed into a load pack, and consecutive
@@ -151,11 +155,11 @@
     <associate|auto-19|<tuple|6.2|3>>
     <associate|auto-2|<tuple|2|1>>
     <associate|auto-20|<tuple|6.3|3>>
-    <associate|auto-21|<tuple|6.3.1|?>>
-    <associate|auto-22|<tuple|6.3.2|?>>
-    <associate|auto-23|<tuple|6.3.3|?>>
-    <associate|auto-24|<tuple|6.3.4|?>>
-    <associate|auto-25|<tuple|6.4.3|?>>
+    <associate|auto-21|<tuple|6.4|3>>
+    <associate|auto-22|<tuple|6.4.1|3>>
+    <associate|auto-23|<tuple|6.4.2|3>>
+    <associate|auto-24|<tuple|6.4.3|3>>
+    <associate|auto-25|<tuple|6.4.4|?>>
     <associate|auto-3|<tuple|2.1|1>>
     <associate|auto-4|<tuple|2.2|1>>
     <associate|auto-5|<tuple|2.3|1>>
@@ -245,9 +249,25 @@
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-19>>
 
-      <with|par-left|<quote|1tab>|6.3<space|2spc>The Big Packer
+      <with|par-left|<quote|1tab>|6.3<space|2spc>Methods
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-20>>
+
+      <with|par-left|<quote|2tab>|6.3.1<space|2spc>checkIndependence
+      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-21>>
+
+      <with|par-left|<quote|2tab>|6.3.2<space|2spc>isCompatible
+      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-22>>
+
+      <with|par-left|<quote|2tab>|6.3.3<space|2spc>canSpeculateAt &
+      findSpeculationCond <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-23>>
+
+      <with|par-left|<quote|2tab>|6.3.4<space|2spc>matchSecondaryInsts
+      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-24>>
     </associate>
   </collection>
 </auxiliary>
