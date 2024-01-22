@@ -1,4 +1,4 @@
-<TeXmacs|2.1.1>
+<TeXmacs|2.1.4>
 
 <style|generic>
 
@@ -223,8 +223,6 @@
 
   <subsubsection|UnrollRuntimeLoopRemainder>
 
-  \;
-
   <section|UnrollFactor>
 
   <subsection|computeUnrollFactor>
@@ -232,6 +230,134 @@
   <subsection|unrollLoops>
 
   <subsection|getSeeds>
+
+  This function returns a vector of operand packs that can be used as seeds
+  for vectorization. An operand pack is a set of instructions (LLVM Values)
+  that have the same type and can be packed into a vector register. The
+  function takes three parameters: Pkr is a reference to a Packer object,
+  which is a class that performs vectorization on LLVM IR; DupToOrigLoopMap
+  is a reference to a dense map that maps duplicated loops to their original
+  loops and iteration numbers; UnrolledIterations is a reference to a dense
+  map that maps unrolled instructions to their original instructions and
+  iteration numbers.
+
+  The function does the following steps:
+
+  <\enumerate-Roman>
+    <item>It checks if the ForwardSeeds flag is set, which indicates whether
+    to use forward propagation to find seed operands. if not, it returns an
+    empty vector.
+
+    <item>It gets a reference to the loop info analysis of the packer, which
+    provides information about the loops in the function.
+
+    <item>It defines a lambda function named GetUnrollVector, which takes an
+    instruction pointer as an argument and returns a vector of unsigned
+    integers. The vector represents the unroll vector of the instruction,
+    which is a sequence of iteration numbers for each loop level that the
+    instruction belongs to. The lambda function does the following:
+
+    <\enumerate-roman>
+      <item>It initializes an empty vector X.
+
+      <item>It gets the basic block and the loop that contain the
+      instruction.
+
+      <item>If the instruction is not in any loop, it returns X.
+
+      <item>It pushes the unrolled iteration number of the instruction in the
+      innermost loop to X. If the instruction is not unrolled, it pushes
+      zero. This is done by using the UnrolledIterations map.
+
+      <item>It iterates over the loop and its parent loops, and pushes the
+      unrolled iteration number of the loop to X. If the loop is not
+      duplicated, it pushes zero. This is done by using the DupToOrigLoopMap
+      map.
+
+      <item>It returns X.
+    </enumerate-roman>
+
+    <item>It gets a pointer to the function that the packer is working on.
+
+    <item>It declares a map named InstToDim, which maps an original
+    instruction to the dimension of its unroll vector. It also declares a map
+    named UnrolledInsts, which maps a pair of an original instruction and its
+    unroll vector to the corresponding unrolled instruction.
+
+    <item>It iterates over all the instructions in the function, and does the
+    following for each instruction:
+
+    <\enumerate-roman>
+      <item>It checks if the instruction is unrolled by using the
+      UnrooledIterations map. If not, it continues to the next instruction.
+
+      <item>It gets the original instruction and the unroll vector of the
+      current instruction by using the map and the lambda function.
+
+      <item>It inserts the pair of the original instruction and the unroll
+      vector, and the current instruction to the UnrolledInsts map.
+
+      <item>It inserts the original instruction and the dimension of the
+      unroll vector to the InstToDim map.
+    </enumerate-roman>
+
+    <item>It gets the maximum vector width that the target can support for
+    load and store instructions by using the target transform info analysis
+    of the packer.
+
+    <item>It creates a reverse post-order traversal object for the function,
+    which allows iterating over the basic blocks in reverse post-order.
+
+    <item>It gets a pointer to the vector pack context of the packer, which
+    is a class that manages the operand packs and their canonical forms.
+
+    <item>It declares a vector of const operand pack pointers named
+    SeedOperands, which will store the result of the function.
+
+    <item>It iterates over the basic blocks in reverse post-order, and does
+    the following for each basic block:
+
+    <\enumerate-roman>
+      <item>It iterates over the instructions in the basic block in reverse
+      order, and does the following for each instruction:
+
+      <item>It gets the type of the instruction and checks if it is void or
+      vector. If so, it continues to the next instruction.
+
+      <item>It computes the maximum vector length that the instruction can be
+      packed into by dividing the maximum vector width by the bit width of
+      the instruction type.
+
+      <item>It checks if the instruction is unrolled by using the
+      UnrolledIterations map. It gets the original instruction and the unroll
+      vector of the current instruction by using the map and the lambda
+      function.
+
+      <item>It iterates over the dimensions of the unroll vector, and does
+      the following for each dimension:
+
+      <\enumerate-numeric>
+        <item>It tries to find a chain of instructions along the dimension
+        that can be packed together. A chain is a sequence of instructions
+        that have the same original instruction and the same unroll vector
+        except for the current dimension. The chain starts with the current
+        instruction and grows by incrementing the value of the current
+        dimension in the unroll vector and looking up the UnrolledInsts map.
+        The chain stops when it reaches the maximum vector length or when
+        there is no matching instruction in the map.
+
+        <item>If the chain has more than one instruction and its size is a
+        power of two, it creates an operand pack from the chain and inserts
+        it to the SeedOperands vector. It also gets the canonical form of the
+        operand pack from the vector pack context and inserts it to the
+        SeedOperands vector. The canonical form is a unique representation of
+        an operand pack that ignores the order and duplication of the
+        instructions.
+      </enumerate-numeric>
+    </enumerate-roman>
+
+    <item>It returns the SeedOperands vector.
+  </enumerate-Roman>
 </body>
 
 <\initial>
@@ -251,13 +377,12 @@
     <associate|auto-14|<tuple|3.3.1|2>>
     <associate|auto-15|<tuple|3.3.2|3>>
     <associate|auto-16|<tuple|3.3.3|3>>
-    <associate|auto-17|<tuple|3.3.4|?>>
-    <associate|auto-18|<tuple|4|?>>
-    <associate|auto-19|<tuple|4.1|?>>
+    <associate|auto-17|<tuple|3.3.4|4>>
+    <associate|auto-18|<tuple|4|4>>
+    <associate|auto-19|<tuple|4.1|4>>
     <associate|auto-2|<tuple|2|1>>
-    <associate|auto-20|<tuple|4.2|?>>
-    <associate|auto-21|<tuple|4.3|?>>
-    <associate|auto-24|<tuple|4.5|?>>
+    <associate|auto-20|<tuple|4.2|4>>
+    <associate|auto-21|<tuple|4.3|4>>
     <associate|auto-3|<tuple|2.1|1>>
     <associate|auto-4|<tuple|2.2|1>>
     <associate|auto-5|<tuple|2.2.1|1>>
@@ -331,9 +456,29 @@
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-15>>
 
+      <with|par-left|<quote|2tab>|3.3.3<space|2spc>Peel Loop
+      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-16>>
+
+      <with|par-left|<quote|2tab>|3.3.4<space|2spc>UnrollRuntimeLoopRemainder
+      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-17>>
+
       <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|4<space|2spc>UnrollFactor>
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-16><vspace|0.5fn>
+      <no-break><pageref|auto-18><vspace|0.5fn>
+
+      <with|par-left|<quote|1tab>|4.1<space|2spc>computeUnrollFactor
+      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-19>>
+
+      <with|par-left|<quote|1tab>|4.2<space|2spc>unrollLoops
+      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-20>>
+
+      <with|par-left|<quote|1tab>|4.3<space|2spc>getSeeds
+      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-21>>
     </associate>
   </collection>
 </auxiliary>
