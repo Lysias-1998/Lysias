@@ -84,6 +84,16 @@
     <item>Otherwise, it returns the cost of the optimal vectorization plan as
     the result of the function.
   </itemize-minus>
+
+  <section|improvePlan>
+
+  <subsection|Plan>
+
+  A VPlan is a data structure used by VeGen, a vectorization framework for
+  LLVM. A VPlan contains a reference to a Packer object, a floating-point
+  number Cost, and a set of VectorPack objects. As the name suggests, a
+  VectorPackSet is also a collection of VectorPack objects, but a VPlan is
+  more concerned with the cost and the search algorithm.
 </body>
 
 <\initial>
@@ -97,6 +107,22 @@
 
 <\references>
   <\collection>
-    <associate|auto-1|<tuple|1|?>>
+    <associate|auto-1|<tuple|1|1>>
+    <associate|auto-2|<tuple|2|2>>
+    <associate|auto-3|<tuple|2.1|?>>
   </collection>
 </references>
+
+<\auxiliary>
+  <\collection>
+    <\associate|toc>
+      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|1<space|2spc>optimizeBottomUp>
+      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-1><vspace|0.5fn>
+
+      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|2<space|2spc>improvePlan>
+      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-2><vspace|0.5fn>
+    </associate>
+  </collection>
+</auxiliary>
