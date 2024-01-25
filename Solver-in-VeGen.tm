@@ -85,15 +85,26 @@
     the result of the function.
   </itemize-minus>
 
-  <section|improvePlan>
-
-  <subsection|Plan>
+  <section|Plan>
 
   A VPlan is a data structure used by VeGen, a vectorization framework for
   LLVM. A VPlan contains a reference to a Packer object, a floating-point
   number Cost, and a set of VectorPack objects. As the name suggests, a
   VectorPackSet is also a collection of VectorPack objects, but a VPlan is
   more concerned with the cost and the search algorithm.
+
+  <section|improvePlan>
+
+  The function name is somehow misleading, since originally there is no plan
+  at all. It is improvePlan that plans from the beginning.
+
+  <subsection|Seeds>
+
+  Seeds are defined as a vector of VectorPack. For each instruction from the
+  function getting from the input Packer, skip instructions that are not
+  scalar store instructions. Then, call getSeedMemPacks which gets
+  information from AccessDAG to pack consecutive scalar stores into a
+  VectorPack, and push VectorPack to Seeds.
 </body>
 
 <\initial>
@@ -109,7 +120,9 @@
   <\collection>
     <associate|auto-1|<tuple|1|1>>
     <associate|auto-2|<tuple|2|2>>
-    <associate|auto-3|<tuple|2.1|?>>
+    <associate|auto-3|<tuple|3|2>>
+    <associate|auto-4|<tuple|3.1|?>>
+    <associate|auto-6|<tuple|5|?>>
   </collection>
 </references>
 
@@ -123,6 +136,10 @@
       <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|2<space|2spc>improvePlan>
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-2><vspace|0.5fn>
+
+      <with|par-left|<quote|1tab>|2.1<space|2spc>Plan
+      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-3>>
     </associate>
   </collection>
 </auxiliary>
