@@ -100,11 +100,22 @@
 
   <subsection|Seeds>
 
-  Seeds are defined as a vector of VectorPack. For each instruction from the
-  function getting from the input Packer, skip instructions that are not
-  scalar store instructions. Then, call getSeedMemPacks which gets
-  information from AccessDAG to pack consecutive scalar stores into a
-  VectorPack, and push VectorPack to Seeds.
+  The improvePlan function takes a vector of VectorPack objects as Seeds.
+
+  <\itemize-dot>
+    <item>It iterates over the instructions in the function obtained from the
+    input Packer, and ignores those that are not scalar store instructions.
+
+    <item>Then, it calls getSeedMemPacks, which uses AccessDAG to pack
+    consecutive scalar stores into a VectorPack. When generating VectorPacks,
+    the function sets the vector length (VL) to 2, 4, or 8, and adds the
+    generated packs to the Seeds.
+
+    <item>Finally, it sorts the VectorPacks in Seeds according to the id in
+    LayoutInfo and the descending order of their element counts, which
+    prioritizes smaller ids (i.e., the leaders in access) and larger element
+    counts.
+  </itemize-dot>
 </body>
 
 <\initial>
@@ -121,8 +132,7 @@
     <associate|auto-1|<tuple|1|1>>
     <associate|auto-2|<tuple|2|2>>
     <associate|auto-3|<tuple|3|2>>
-    <associate|auto-4|<tuple|3.1|?>>
-    <associate|auto-6|<tuple|5|?>>
+    <associate|auto-4|<tuple|3.1|2>>
   </collection>
 </references>
 
@@ -133,13 +143,17 @@
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-1><vspace|0.5fn>
 
-      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|2<space|2spc>improvePlan>
+      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|2<space|2spc>Plan>
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-2><vspace|0.5fn>
 
-      <with|par-left|<quote|1tab>|2.1<space|2spc>Plan
+      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|3<space|2spc>improvePlan>
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-3>>
+      <no-break><pageref|auto-3><vspace|0.5fn>
+
+      <with|par-left|<quote|1tab>|3.1<space|2spc>Seeds
+      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-4>>
     </associate>
   </collection>
 </auxiliary>
