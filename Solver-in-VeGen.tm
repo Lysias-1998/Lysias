@@ -102,6 +102,8 @@
 
   The improvePlan function takes a vector of VectorPack objects as Seeds.
 
+  <subsubsection|Store Packs>
+
   <\itemize-dot>
     <item>It iterates over the instructions in the function obtained from the
     input Packer, and ignores those that are not scalar store instructions.
@@ -116,6 +118,19 @@
     prioritizes smaller ids (i.e., the leaders in access) and larger element
     counts.
   </itemize-dot>
+
+  <subsubsection|Loop-Reduction Packs>
+
+  A loop reduction variable is updated in every loop iteration, so it must be
+  compiled into a \<phi\> instruction in the SSA IR. Starting from the
+  \<phi\> instructions, the improvePlan function recursively builds a
+  reduction chain, producing a ReductionInfo object. The reduction variable
+  can be either integer or floating-point, and it cannot have more than one
+  use. Moreover, the reduced values that form the reduction variable cannot
+  have more than one in-loop use (otherwise, after vectorizing, we have to
+  extract the value from the vector for that use). The function also takes
+  special care of the operands of the call instructions, trying to find the
+  reduction opportunities of these operands.
 </body>
 
 <\initial>
@@ -133,6 +148,8 @@
     <associate|auto-2|<tuple|2|2>>
     <associate|auto-3|<tuple|3|2>>
     <associate|auto-4|<tuple|3.1|2>>
+    <associate|auto-5|<tuple|3.1.1|?>>
+    <associate|auto-6|<tuple|3.1.2|?>>
   </collection>
 </references>
 
