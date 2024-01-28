@@ -131,6 +131,31 @@
   extract the value from the vector for that use). The function also takes
   special care of the operands of the call instructions, trying to find the
   reduction opportunities of these operands.
+
+  <subsubsection|Heuristic>
+
+  The Heuristic module in VeGen is responsible for finding a suitable
+  solution for a given operand pack. The interface of Heuristic has only one
+  important function, namely solve, which takes a constant reference to an
+  OperandPack and returns a Solution object. A Solution object contains an
+  array of VectorPacks that represent the vectorized code (similar to a
+  VPlan).
+
+  The Heuristic module is based on three simple rules, which correspond to
+  three heuristic ways of building vector packs. They are: (1) insert all
+  operands into a vector pack, (2) broadcast an operand if all elements in a
+  vector pack are equal, and (3) extract an operand from an existing vector
+  pack.\ 
+
+  An OperandPack must be a vector, not a set, because one Value could be used
+  multiple times. To enable more flexibility in using the extracted values,
+  the Heuristic module also allows two shuffle strategies, transpose and
+  de-interleave, to rearrange the elements in a vector pack.
+
+  In the Solver module, the Heuristic module has two uses. One is inside the
+  improvePlan function, which is passed to the runBottomUpFromOperand
+  function. The other is inside the tryPackBackEdgeConditions function, which
+  is used to handle loop-carried dependencies.
 </body>
 
 <\initial>
@@ -148,8 +173,9 @@
     <associate|auto-2|<tuple|2|2>>
     <associate|auto-3|<tuple|3|2>>
     <associate|auto-4|<tuple|3.1|2>>
-    <associate|auto-5|<tuple|3.1.1|?>>
-    <associate|auto-6|<tuple|3.1.2|?>>
+    <associate|auto-5|<tuple|3.1.1|2>>
+    <associate|auto-6|<tuple|3.1.2|2>>
+    <associate|auto-7|<tuple|3.1.3|2>>
   </collection>
 </references>
 
@@ -171,6 +197,18 @@
       <with|par-left|<quote|1tab>|3.1<space|2spc>Seeds
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-4>>
+
+      <with|par-left|<quote|2tab>|3.1.1<space|2spc>Store Packs
+      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-5>>
+
+      <with|par-left|<quote|2tab>|3.1.2<space|2spc>Loop-Reduction Packs
+      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-6>>
+
+      <with|par-left|<quote|2tab>|3.1.3<space|2spc>Heuristic
+      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-7>>
     </associate>
   </collection>
 </auxiliary>
