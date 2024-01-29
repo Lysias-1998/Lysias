@@ -156,6 +156,175 @@
   improvePlan function, which is passed to the runBottomUpFromOperand
   function. The other is inside the tryPackBackEdgeConditions function, which
   is used to handle loop-carried dependencies.
+
+  <subsubsection|runBottomUpFromOperand>
+
+  runBottomUpFromOperand takes five parameters: a pointer to an OperandPack
+  object, a reference to a Plan object, a reference to a Heuristic object, a
+  boolean value, and a function object. The purpose of this function is to
+  optimize a plan for vectorizing a set of operands using a bottom-up
+  heuristic.
+
+  An OperandPack is a data structure that represents a group of scalar
+  operands that can be vectorized together. A VectorPack is a data structure
+  that represents a group of vector operands that are produced by vectorizing
+  an OperandPack. A Plan is a data structure that stores a set of VectorPacks
+  and their associated costs. A Heuristic is a data structure that implements
+  a strategy for finding the best VectorPacks for a given OperandPack.
+
+  The function body consists of the following steps:
+
+  <\enumerate-Roman>
+    <item>Initialize a Worklist of OperandPack pointers, and push the input
+    OperandPack pointer to it. This Worklist will store the OperandPacks that
+    need to be processed by the heuristic.
+
+    <item>Initialize a Visited set of OperandPack pointers. This Visited will
+    store the OperandPacks that have been already processed by the heuristic.
+
+    <item>Loop until the Worklist is empty:
+
+    <\enumerate-roman>
+      <item>Verify the cost of the current Plan using the verifyCost method.\ 
+
+      <item>Pop the last OperandPack pointer from the WorkList and assign it
+      to a local variable named OP.
+
+      <item>If OP is already in the Visited set, skip the rest of the loop
+      iteration. This avoids processing the same OperandPack twice.
+
+      <item>Call the solve method of the Heuristic object with OP as the
+      argument, and assign the result to a local variable named NewPacks.
+      This is a SmallVector of VectorPack pointers that represents the best
+      solution for vectorizing OP according to the heuristic.
+
+      <item>Initialize a local variable named OldPacks as a SmallPtrSet of
+      VectorPack Pointers. This will store the VectorPacks that need to be
+      replaced by the NewPacks.
+
+      <item>Loop over the NewPacks vector:
+
+      <\enumerate-alpha>
+        <item>Loop over the element values of each VectorPack using the
+        elementValues method. There are the scalar values that are combined
+        into the vector value.
+
+        <item>If the element value is an Instruction object, call the
+        getProducer method of the Plan object with it as the argument, and
+        ssign the result to a local variable named VP2. This is a VectorPack
+        pointer that represents the current producer of the element value in
+        the Plan.
+
+        <item>If VP2 is not null, insert it into the OldPacks set. This means
+        that the element value is already vectorized by another VectorPack
+        that needs to be replaced by the new one.
+      </enumerate-alpha>
+
+      <item>If the OverrideExisting parameter is false and the OldPacks set
+      is not empty, skip the rest of the loop iteration. This means that the
+      function does not allow replacing existing VectorPacks in the Plan.
+
+      <item>Loop Over the OldPacks set:
+
+      <\enumerate-alpha>
+        <item>Call the remove method of the Plan object with each VectorPack
+        pointer as the argument. This removes the VectorPack from the Plan
+        and updates its cost.
+      </enumerate-alpha>
+
+      <item>Loop over the NewPacks vector:
+
+      <\enumerate-alpha>
+        <item>Call the add method of the Plan object with each VectorPack
+        pointer as the argument. This adds the VectorPack to the Plan and
+        updates its cost.
+
+        <item>Call the getOperandPacks method of each VectorPack and assign
+        the result to a local variable named Operands.
+
+        <item>Append the Operands array to the end of the WorklistVector
+        using the append method. This adds the operands of the VectorPack to
+        the Worklist for further processing by the heuristic.
+
+        <item>If the GetExtraOperands parameter is not null, call it with the
+        VectorPack pointer and the Worklist vector as the arguments. This is
+        a function object that can add extra operands to the Worklist based
+        on custom logic.
+      </enumerate-alpha>
+    </enumerate-roman>
+
+    <item>The function does not return anything, but it modifies the Plan
+    object passed by reference. The final Plan object represents the
+    optimized plan for vectorizing the input OperandPack and its descendants
+    using the bottom-up heuristic.
+  </enumerate-Roman>
+
+  <subsubsection|Decomposed Stores>
+
+  decomposeStorePacks takes two parameters: a pointer to a Packer object and
+  a pointer to a VectorPack object. The purpose of this function is to
+  decompose a store pack into smaller packs that fit in the native bitwidth
+  of the target architecture.
+
+  A Packer is a data structure that implements the vectorization algorithm
+  for a given function. A VectorPack is a data structure that represents a
+  group of vector operands that are produced by vectorizing an OperandPack.
+  An OperandPack represents a group of scalar operands that can be vectorized
+  together. A StoreInst is a subclass of Instruction that represents a store
+  operation.
+
+  <\itemize-dot>
+    <item>Assert that the input VectorPack is a store pack using the isStore
+    method. This means that it contains store instructions as its element
+    values.
+
+    <item>Call the getOrderedValues method of the input VectorPack and assign
+    the result to a local variable named Values. This is an ArrayRef of Value
+    pointers that represents the ordered element values of the store pack.
+
+    <item>Cast the first element of Values to a StoreInst, SI.
+
+    <item>Call the getLoadStoreVecRegBitWidth method of the TTI object, and
+    divide the result by the bit width of the value operand of the SI using
+    the getBitWidth function and the getDataLayout method of the Packer
+    object. Assign the result to a local variable named VL. This is an
+    unsigned integer that represents the maximum vector length in bits that
+    can be used for load and store operations.
+
+    <item>Call the getDA method of the Packer to get a DependenceAnalysis
+    result, DA.
+
+    <item>if the size of the Values array is less than or equal to the VL
+    variable, return a SmallVector containing the input VectorPack as the
+    only element. This means that the store pack does not need to be
+    decomposed further.
+
+    <item>Otherwise, initialize a local variable named Decomposed as a
+    SmallVector of VectorPack pointers. This will store the decomposed store
+    packs.
+
+    <item>Loop over the Values array with an index variable named i that
+    starts from zero and increments by VL until it reaches the size of the
+    Values array, which is assigned to a local variable named N. This loop
+    will split the store pack into smaller chunks of size VL.
+  </itemize-dot>
+
+  <subsubsection|tryPackBackEdgeConds>
+
+  A conditionPack represents a group of control conditions that affect the
+  vectorization of an OperandPack. A Heuristic implements a strategy for
+  finding the best VectorPacks for a given OperandPack.
+
+  The getBackEdgePacks function takes three parameters: a pointer to a
+  Packer, a reference to a Plan, and a reference to a SmallPtrSet of
+  ConditionPack pointers. The purpose of this function is to collect all the
+  back-edge condition packs for packs of values from divergent loops in the
+  plan.
+
+  A back-edge condition is a control condition that determines whether a loop
+  will iterate again or exit. A divergent loop is a loop that has different
+  trip counts for different vector lanes. A trip count is the number of times
+  a loop iterates. A vector lane is a scalar element of a vector value.
 </body>
 
 <\initial>
@@ -170,12 +339,15 @@
 <\references>
   <\collection>
     <associate|auto-1|<tuple|1|1>>
+    <associate|auto-10|<tuple|3.1.6|?>>
     <associate|auto-2|<tuple|2|2>>
     <associate|auto-3|<tuple|3|2>>
     <associate|auto-4|<tuple|3.1|2>>
     <associate|auto-5|<tuple|3.1.1|2>>
     <associate|auto-6|<tuple|3.1.2|2>>
     <associate|auto-7|<tuple|3.1.3|2>>
+    <associate|auto-8|<tuple|3.1.4|?>>
+    <associate|auto-9|<tuple|3.1.5|?>>
   </collection>
 </references>
 
