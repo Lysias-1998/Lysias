@@ -1,9 +1,19 @@
-<TeXmacs|2.1.1>
+<TeXmacs|2.1.4>
 
 <style|generic>
 
 <\body>
   <doc-data|<doc-title|Compiler Driver in VeGen>>
+
+  <section|Pass Plugin>
+
+  VeGen is implemented as an LLVM pass plug-in, which can be executed using
+  both llvm-opt and clang.
+
+  <cpp|clang -Os xxx.c -fpass-plugin=vegen.so -Xclang -load -Xclang vegen.so>
+
+  <cpp|opt -load vegen.so -load-pass-plugin vegen.so -passes=slp -o /dev/null
+  xxx.ll>
 
   <section|Header Files>
 
@@ -99,31 +109,26 @@
 <\references>
   <\collection>
     <associate|auto-1|<tuple|1|1>>
-    <associate|auto-10|<tuple|1.9|1>>
-    <associate|auto-11|<tuple|2|1>>
+    <associate|auto-10|<tuple|2.8|1>>
+    <associate|auto-11|<tuple|2.9|1>>
     <associate|auto-12|<tuple|3|1>>
-    <associate|auto-13|<tuple|3.1|1>>
-    <associate|auto-14|<tuple|3.2|1>>
-    <associate|auto-15|<tuple|3.3|1>>
-    <associate|auto-16|<tuple|3.3.1|1>>
-    <associate|auto-17|<tuple|3.3.2|1>>
-    <associate|auto-18|<tuple|3.3.3|1>>
-    <associate|auto-19|<tuple|3.3.4|2>>
-    <associate|auto-2|<tuple|1.1|1>>
-    <associate|auto-20|<tuple|3.3.5|2>>
-    <associate|auto-21|<tuple|3.3|2>>
-    <associate|auto-22|<tuple|3.3.1|2>>
-    <associate|auto-23|<tuple|3.3.2|2>>
-    <associate|auto-24|<tuple|3.3.3|2>>
-    <associate|auto-25|<tuple|3.3.4|2>>
-    <associate|auto-26|<tuple|3.3.5|2>>
-    <associate|auto-3|<tuple|1.2|1>>
-    <associate|auto-4|<tuple|1.3|1>>
-    <associate|auto-5|<tuple|1.4|1>>
-    <associate|auto-6|<tuple|1.5|1>>
-    <associate|auto-7|<tuple|1.6|1>>
-    <associate|auto-8|<tuple|1.7|1>>
-    <associate|auto-9|<tuple|1.8|1>>
+    <associate|auto-13|<tuple|4|1>>
+    <associate|auto-14|<tuple|4.1|2>>
+    <associate|auto-15|<tuple|4.2|2>>
+    <associate|auto-16|<tuple|4.3|2>>
+    <associate|auto-17|<tuple|4.3.1|2>>
+    <associate|auto-18|<tuple|4.3.2|2>>
+    <associate|auto-19|<tuple|4.3.3|2>>
+    <associate|auto-2|<tuple|2|1>>
+    <associate|auto-20|<tuple|4.3.4|2>>
+    <associate|auto-21|<tuple|4.3.5|?>>
+    <associate|auto-3|<tuple|2.1|1>>
+    <associate|auto-4|<tuple|2.2|1>>
+    <associate|auto-5|<tuple|2.3|1>>
+    <associate|auto-6|<tuple|2.4|1>>
+    <associate|auto-7|<tuple|2.5|1>>
+    <associate|auto-8|<tuple|2.6|1>>
+    <associate|auto-9|<tuple|2.7|1>>
   </collection>
 </references>
 
@@ -174,65 +179,41 @@
       Line Options> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-11><vspace|0.5fn>
 
-      <with|par-left|<quote|1tab>|2.1<space|2spc>Wrappers Dir
-      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-12>>
-
-      <with|par-left|<quote|1tab>|2.2<space|2spc>Vectorize Only
-      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-13>>
-
-      <with|par-left|<quote|1tab>|2.3<space|2spc>Filter
-      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-14>>
-
-      <with|par-left|<quote|1tab>|2.4<space|2spc>Disable Unrolling
-      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-15>>
-
-      <with|par-left|<quote|1tab>|2.5<space|2spc>Disable Cleanup
-      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-16>>
-
-      <with|par-left|<quote|1tab>|2.6<space|2spc>Disable Reduction Balancing
-      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-17>>
-
       <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|3<space|2spc>GSLP>
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-18><vspace|0.5fn>
+      <no-break><pageref|auto-12><vspace|0.5fn>
 
       <with|par-left|<quote|1tab>|3.1<space|2spc>Registration
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-19>>
+      <no-break><pageref|auto-13>>
 
       <with|par-left|<quote|1tab>|3.2<space|2spc>Initialization
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-20>>
+      <no-break><pageref|auto-14>>
 
       <with|par-left|<quote|1tab>|3.3<space|2spc>Run on Function
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-21>>
+      <no-break><pageref|auto-15>>
 
       <with|par-left|<quote|2tab>|3.3.1<space|2spc>Skip Unsupported Functions
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-22>>
+      <no-break><pageref|auto-16>>
 
       <with|par-left|<quote|2tab>|3.3.2<space|2spc>Fill up Supported
       Intrinsics <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-23>>
+      <no-break><pageref|auto-17>>
 
       <with|par-left|<quote|2tab>|3.3.3<space|2spc>Loop Unrolling
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-24>>
+      <no-break><pageref|auto-18>>
 
       <with|par-left|<quote|2tab>|3.3.4<space|2spc>BottomUp Packing
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-25>>
+      <no-break><pageref|auto-19>>
 
       <with|par-left|<quote|2tab>|3.3.5<space|2spc>Code Generation
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-26>>
+      <no-break><pageref|auto-20>>
     </associate>
   </collection>
 </auxiliary>
