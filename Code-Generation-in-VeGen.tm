@@ -34,7 +34,7 @@
     conditions.
   </itemize-dot>
 
-  <section|Lower everything>
+  <section|Vector Code Gen>
 
   VeGen defines a class VectorCodeGen with a method run, which takes no
   parameters and returns nothing.
@@ -68,8 +68,6 @@
   </itemize-minus>
 
   The function fixScalarUses patches scalar mu nodes.
-
-  \;
 </body>
 
 <\initial>
@@ -83,6 +81,7 @@
     <associate|auto-1|<tuple|1|1>>
     <associate|auto-2|<tuple|2|1>>
     <associate|auto-3|<tuple|2.1|1>>
+    <associate|auto-4|<tuple|3|?>>
   </collection>
 </references>
 
