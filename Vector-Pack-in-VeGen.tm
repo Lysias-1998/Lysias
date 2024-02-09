@@ -1,4 +1,4 @@
-<TeXmacs|2.1.1>
+<TeXmacs|2.1.4>
 
 <style|generic>
 
@@ -47,6 +47,18 @@
   incoming blocks replaced with explicit control conditions.
 
   <subsection|Cmp>
+
+  <section|Find Vector Packs>
+
+  <subsection|Length of Vector Pack>
+
+  \;
+
+  \;
+
+  <section|Vector Pack Cache>
+
+  \;
 
   <section|Construction of Vector Packs>
 
@@ -282,24 +294,27 @@
     <associate|auto-10|<tuple|2.8|1>>
     <associate|auto-11|<tuple|3|1>>
     <associate|auto-12|<tuple|3.1|2>>
-    <associate|auto-13|<tuple|3.2|2>>
-    <associate|auto-14|<tuple|3.3|2>>
-    <associate|auto-15|<tuple|4|2>>
-    <associate|auto-16|<tuple|5|2>>
-    <associate|auto-17|<tuple|6|3>>
-    <associate|auto-18|<tuple|6.1|3>>
-    <associate|auto-19|<tuple|6.2|4>>
+    <associate|auto-13|<tuple|4|2>>
+    <associate|auto-14|<tuple|5|2>>
+    <associate|auto-15|<tuple|5.1|2>>
+    <associate|auto-16|<tuple|5.2|2>>
+    <associate|auto-17|<tuple|5.3|3>>
+    <associate|auto-18|<tuple|6|3>>
+    <associate|auto-19|<tuple|7|4>>
     <associate|auto-2|<tuple|2|1>>
-    <associate|auto-20|<tuple|6.2.1|4>>
-    <associate|auto-21|<tuple|6.2.2|4>>
-    <associate|auto-22|<tuple|6.3|4>>
-    <associate|auto-23|<tuple|6.4|4>>
-    <associate|auto-24|<tuple|6.5|4>>
-    <associate|auto-25|<tuple|6.5.1|4>>
-    <associate|auto-26|<tuple|6.5.2|4>>
-    <associate|auto-27|<tuple|6.5.3|?>>
-    <associate|auto-28|<tuple|6.5.4|?>>
+    <associate|auto-20|<tuple|8|4>>
+    <associate|auto-21|<tuple|8.1|4>>
+    <associate|auto-22|<tuple|8.2|5>>
+    <associate|auto-23|<tuple|8.2.1|5>>
+    <associate|auto-24|<tuple|8.2.2|5>>
+    <associate|auto-25|<tuple|8.3|5>>
+    <associate|auto-26|<tuple|8.4|5>>
+    <associate|auto-27|<tuple|8.5|5>>
+    <associate|auto-28|<tuple|8.5.1|5>>
+    <associate|auto-29|<tuple|8.5.2|?>>
     <associate|auto-3|<tuple|2.1|1>>
+    <associate|auto-30|<tuple|8.5.3|?>>
+    <associate|auto-31|<tuple|8.5.4|?>>
     <associate|auto-4|<tuple|2.2|1>>
     <associate|auto-5|<tuple|2.3|1>>
     <associate|auto-6|<tuple|2.4|1>>
@@ -388,33 +403,41 @@
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-19>>
 
-      <with|par-left|<quote|1tab>|6.3<space|2spc>Load & Store
+      <with|par-left|<quote|2tab>|6.2.1<space|2spc>buildAccessDAG
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-20>>
 
-      <with|par-left|<quote|1tab>|6.4<space|2spc>Reverse Post Ordering
+      <with|par-left|<quote|2tab>|6.2.2<space|2spc>AccessLayoutInfo
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-21>>
 
-      <with|par-left|<quote|1tab>|6.5<space|2spc>Methods
+      <with|par-left|<quote|1tab>|6.3<space|2spc>Load & Store
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-22>>
 
-      <with|par-left|<quote|2tab>|6.5.1<space|2spc>checkIndependence
+      <with|par-left|<quote|1tab>|6.4<space|2spc>Reverse Post Ordering
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-23>>
 
-      <with|par-left|<quote|2tab>|6.5.2<space|2spc>isCompatible
+      <with|par-left|<quote|1tab>|6.5<space|2spc>Methods
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-24>>
 
+      <with|par-left|<quote|2tab>|6.5.1<space|2spc>checkIndependence
+      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-25>>
+
+      <with|par-left|<quote|2tab>|6.5.2<space|2spc>isCompatible
+      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-26>>
+
       <with|par-left|<quote|2tab>|6.5.3<space|2spc>canSpeculateAt &
       findSpeculationCond <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-25>>
+      <no-break><pageref|auto-27>>
 
       <with|par-left|<quote|2tab>|6.5.4<space|2spc>matchSecondaryInsts
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-26>>
+      <no-break><pageref|auto-28>>
     </associate>
   </collection>
 </auxiliary>
