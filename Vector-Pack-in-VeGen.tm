@@ -99,6 +99,37 @@
   A vector pack set is an abstraction that manages a set of compatible vector
   packs and is responsible for lowering a set of packs to LLVM IR.
 
+  <subsection|Schedule>
+
+  <itemize|<item>Recursively traversing the VLoop (forming a directed acyclic
+  graph or DAG), \ systematically associate each nested loop with its
+  containing parent loop in the higher-level VL hierarchy.>
+
+  <\itemize>
+    <item>Collect all top-level instructions in a DenseSet.
+
+    <item>Define a recursive algorithm called schedule. schedule algorithm
+    initiates at a scheduler item, which could represent an instruction, a
+    vector pack, a control condition, or a VLoop.
+
+    <item>For every type of scheduler item, consider the following cases:
+
+    <\itemize>
+      <item>If the item under consideration is an instruction and resides
+      inside a sub-loop, schedule the entire sub-loop rather than the
+      individual instruction.
+
+      <item>If the item does not belong to any sub-loop or is a top-level
+      instruction, it stems from the parent loop, making it irrelevant for
+      our purposes.
+
+      <item>Should the item happen to be a control condition, proceed
+      accordingly.
+    </itemize>
+  </itemize>
+
+  \;
+
   <page-break>
 
   <section|Packer>
@@ -285,6 +316,7 @@
 <\initial>
   <\collection>
     <associate|page-medium|paper>
+    <associate|preamble|false>
   </collection>
 </initial>
 
@@ -293,28 +325,29 @@
     <associate|auto-1|<tuple|1|1>>
     <associate|auto-10|<tuple|2.8|1>>
     <associate|auto-11|<tuple|3|1>>
-    <associate|auto-12|<tuple|3.1|2>>
-    <associate|auto-13|<tuple|4|2>>
+    <associate|auto-12|<tuple|3.1|1>>
+    <associate|auto-13|<tuple|4|1>>
     <associate|auto-14|<tuple|5|2>>
     <associate|auto-15|<tuple|5.1|2>>
     <associate|auto-16|<tuple|5.2|2>>
-    <associate|auto-17|<tuple|5.3|3>>
-    <associate|auto-18|<tuple|6|3>>
-    <associate|auto-19|<tuple|7|4>>
+    <associate|auto-17|<tuple|5.3|2>>
+    <associate|auto-18|<tuple|6|2>>
+    <associate|auto-19|<tuple|7|2>>
     <associate|auto-2|<tuple|2|1>>
-    <associate|auto-20|<tuple|8|4>>
-    <associate|auto-21|<tuple|8.1|4>>
-    <associate|auto-22|<tuple|8.2|5>>
-    <associate|auto-23|<tuple|8.2.1|5>>
-    <associate|auto-24|<tuple|8.2.2|5>>
-    <associate|auto-25|<tuple|8.3|5>>
-    <associate|auto-26|<tuple|8.4|5>>
-    <associate|auto-27|<tuple|8.5|5>>
-    <associate|auto-28|<tuple|8.5.1|5>>
-    <associate|auto-29|<tuple|8.5.2|?>>
+    <associate|auto-20|<tuple|7.1|2>>
+    <associate|auto-21|<tuple|8|3>>
+    <associate|auto-22|<tuple|8.1|3>>
+    <associate|auto-23|<tuple|8.2|4>>
+    <associate|auto-24|<tuple|8.2.1|4>>
+    <associate|auto-25|<tuple|8.2.2|4>>
+    <associate|auto-26|<tuple|8.3|5>>
+    <associate|auto-27|<tuple|8.4|5>>
+    <associate|auto-28|<tuple|8.5|5>>
+    <associate|auto-29|<tuple|8.5.1|5>>
     <associate|auto-3|<tuple|2.1|1>>
-    <associate|auto-30|<tuple|8.5.3|?>>
-    <associate|auto-31|<tuple|8.5.4|?>>
+    <associate|auto-30|<tuple|8.5.2|5>>
+    <associate|auto-31|<tuple|8.5.3|5>>
+    <associate|auto-32|<tuple|8.5.4|5>>
     <associate|auto-4|<tuple|2.2|1>>
     <associate|auto-5|<tuple|2.3|1>>
     <associate|auto-6|<tuple|2.4|1>>
@@ -367,77 +400,93 @@
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-10>>
 
-      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|3<space|2spc>Construction
-      of Vector Packs> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|3<space|2spc>Find
+      Vector Packs> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-11><vspace|0.5fn>
 
-      <with|par-left|<quote|1tab>|3.1<space|2spc>computeOperandPacks
+      <with|par-left|<quote|1tab>|3.1<space|2spc>Length of Vector Pack
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-12>>
 
-      <with|par-left|<quote|1tab>|3.2<space|2spc>computeOrderedValues
-      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-13>>
-
-      <with|par-left|<quote|1tab>|3.3<space|2spc>computeCost
-      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-14>>
-
       <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|4<space|2spc>Vector
+      Pack Cache> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-13><vspace|0.5fn>
+
+      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|5<space|2spc>Construction
+      of Vector Packs> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-14><vspace|0.5fn>
+
+      <with|par-left|<quote|1tab>|5.1<space|2spc>computeOperandPacks
+      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-15>>
+
+      <with|par-left|<quote|1tab>|5.2<space|2spc>computeOrderedValues
+      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-16>>
+
+      <with|par-left|<quote|1tab>|5.3<space|2spc>computeCost
+      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-17>>
+
+      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|6<space|2spc>Vector
       Pack Context> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-15><vspace|0.5fn>
+      <no-break><pageref|auto-18><vspace|0.5fn>
 
-      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|5<space|2spc>Vector
+      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|7<space|2spc>Vector
       Pack Set> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-16><vspace|0.5fn>
+      <no-break><pageref|auto-19><vspace|0.5fn>
 
-      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|6<space|2spc>Packer>
-      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-17><vspace|0.5fn>
-
-      <with|par-left|<quote|1tab>|6.1<space|2spc>Packer Fields
-      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-18>>
-
-      <with|par-left|<quote|1tab>|6.2<space|2spc>Packer Construction
-      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-19>>
-
-      <with|par-left|<quote|2tab>|6.2.1<space|2spc>buildAccessDAG
+      <with|par-left|<quote|1tab>|7.1<space|2spc>Schedule
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-20>>
 
-      <with|par-left|<quote|2tab>|6.2.2<space|2spc>AccessLayoutInfo
+      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|8<space|2spc>Packer>
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-21>>
+      <no-break><pageref|auto-21><vspace|0.5fn>
 
-      <with|par-left|<quote|1tab>|6.3<space|2spc>Load & Store
+      <with|par-left|<quote|1tab>|8.1<space|2spc>Packer Fields
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-22>>
 
-      <with|par-left|<quote|1tab>|6.4<space|2spc>Reverse Post Ordering
+      <with|par-left|<quote|1tab>|8.2<space|2spc>Packer Construction
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-23>>
 
-      <with|par-left|<quote|1tab>|6.5<space|2spc>Methods
+      <with|par-left|<quote|2tab>|8.2.1<space|2spc>buildAccessDAG
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-24>>
 
-      <with|par-left|<quote|2tab>|6.5.1<space|2spc>checkIndependence
+      <with|par-left|<quote|2tab>|8.2.2<space|2spc>AccessLayoutInfo
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-25>>
 
-      <with|par-left|<quote|2tab>|6.5.2<space|2spc>isCompatible
+      <with|par-left|<quote|1tab>|8.3<space|2spc>Load & Store
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-26>>
 
-      <with|par-left|<quote|2tab>|6.5.3<space|2spc>canSpeculateAt &
-      findSpeculationCond <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <with|par-left|<quote|1tab>|8.4<space|2spc>Reverse Post Ordering
+      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-27>>
 
-      <with|par-left|<quote|2tab>|6.5.4<space|2spc>matchSecondaryInsts
+      <with|par-left|<quote|1tab>|8.5<space|2spc>Methods
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-28>>
+
+      <with|par-left|<quote|2tab>|8.5.1<space|2spc>checkIndependence
+      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-29>>
+
+      <with|par-left|<quote|2tab>|8.5.2<space|2spc>isCompatible
+      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-30>>
+
+      <with|par-left|<quote|2tab>|8.5.3<space|2spc>canSpeculateAt &
+      findSpeculationCond <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-31>>
+
+      <with|par-left|<quote|2tab>|8.5.4<space|2spc>matchSecondaryInsts
+      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-32>>
     </associate>
   </collection>
 </auxiliary>

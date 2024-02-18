@@ -19,6 +19,17 @@
   and returns a vector of VectorPacks to form a VectorPackSet. The solver is
   not a class, but a function named optimizeBottomUp in the solver file.
 
+  <section|getSeedMemPacks>
+
+  The load/store directed acyclic graph (DAG) represents the dependencies
+  between low and high address memory accesses. The <code*|getSeedMemPacks>
+  function extracts consecutive load or store operations from the access DAG,
+  which maps each memory access instruction to its preceding instructions.
+  The behavior of the <code*|Enumerate> lambda function, specifically how it
+  maintains the order of seed packs while checking for loop dependencies and
+  independence, remains unclear. Evidence suggests that the access order
+  might not be strictly preserved.
+
   <section|optimizeBottomUp>
 
   The function optimizeBottomUp is a solver that tries to find the best
@@ -85,13 +96,15 @@
     the result of the function.
   </itemize-minus>
 
-  <section|Plan>
+  <section|Plan: VeGen's VPlan>
 
-  A VPlan is a data structure used by VeGen, a vectorization framework for
-  LLVM. A VPlan contains a reference to a Packer object, a floating-point
-  number Cost, and a set of VectorPack objects. As the name suggests, a
-  VectorPackSet is also a collection of VectorPack objects, but a VPlan is
-  more concerned with the cost and the search algorithm.
+  A VPlan consists of a Packer object, a Cost value, and a VectorPackSet. A
+  VectorPackSet maps each Value to a VectorPack, which is a group of scalar
+  values packed into a vector register. A VPlan also maintains three
+  additional maps: Instruction to VectorPackSlot, Instruction to
+  OperandPackSet, and Value to VectorPack. These maps help the VPlan to
+  estimate the cost of vectorization based on the number and type of
+  OperandPacks and Instructions.
 
   <section|improvePlan>
 
@@ -311,10 +324,6 @@
 
   <subsubsection|tryPackBackEdgeConds>
 
-  A conditionPack represents a group of control conditions that affect the
-  vectorization of an OperandPack. A Heuristic implements a strategy for
-  finding the best VectorPacks for a given OperandPack.
-
   The getBackEdgePacks function takes three parameters: a pointer to a
   Packer, a reference to a Plan, and a reference to a SmallPtrSet of
   ConditionPack pointers. The purpose of this function is to collect all the
@@ -339,15 +348,16 @@
 <\references>
   <\collection>
     <associate|auto-1|<tuple|1|1>>
-    <associate|auto-10|<tuple|3.1.6|?>>
+    <associate|auto-10|<tuple|4.1.5|5>>
+    <associate|auto-11|<tuple|4.1.6|?>>
     <associate|auto-2|<tuple|2|2>>
     <associate|auto-3|<tuple|3|2>>
-    <associate|auto-4|<tuple|3.1|2>>
-    <associate|auto-5|<tuple|3.1.1|2>>
-    <associate|auto-6|<tuple|3.1.2|2>>
-    <associate|auto-7|<tuple|3.1.3|2>>
-    <associate|auto-8|<tuple|3.1.4|?>>
-    <associate|auto-9|<tuple|3.1.5|?>>
+    <associate|auto-4|<tuple|4|2>>
+    <associate|auto-5|<tuple|4.1|2>>
+    <associate|auto-6|<tuple|4.1.1|2>>
+    <associate|auto-7|<tuple|4.1.2|2>>
+    <associate|auto-8|<tuple|4.1.3|3>>
+    <associate|auto-9|<tuple|4.1.4|4>>
   </collection>
 </references>
 
@@ -358,8 +368,8 @@
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-1><vspace|0.5fn>
 
-      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|2<space|2spc>Plan>
-      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|2<space|2spc>Plan:
+      VeGen's VPlan> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-2><vspace|0.5fn>
 
       <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|3<space|2spc>improvePlan>
@@ -381,6 +391,18 @@
       <with|par-left|<quote|2tab>|3.1.3<space|2spc>Heuristic
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-7>>
+
+      <with|par-left|<quote|2tab>|3.1.4<space|2spc>runBottomUpFromOperand
+      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-8>>
+
+      <with|par-left|<quote|2tab>|3.1.5<space|2spc>Decomposed Stores
+      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-9>>
+
+      <with|par-left|<quote|2tab>|3.1.6<space|2spc>tryPackBackEdgeConds
+      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-10>>
     </associate>
   </collection>
 </auxiliary>
