@@ -65,6 +65,12 @@
     <item>Generate code according to the schedule.
 
     <item>Emit reductions.
+
+    <item>Patch the mu nodes using setIncomingValue and fixScalarUses.
+
+    <item>Record guarded live outs.
+
+    <item>Return the Header and the Exit.
   </itemize-minus>
 
   The function fixScalarUses patches scalar mu nodes.
