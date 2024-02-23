@@ -5,14 +5,13 @@
 <\body>
   <doc-data|<doc-title|Solver in VeGen>>
 
-  The role of the solver in the VeGen framework was initially unclear to me.
-  I discovered that the optimizeBottomUp function, which is invoked in the
-  GSLP driver, is the core of the solver. The solver aims to create a good
-  VectorPackSet for later code generation, using planning and heuristics. The
-  construction of a VectorPackSet is simple, but the codegen method is
-  complex. The only interaction between the solver and the VectorPackSet is
-  the tryAdd method, which checks the compatibility of the VectorPack to be
-  added and updates the PackedValues, AllPacks, and ValueToPackMap.
+  The optimizeBottomUp function, which is invoked in the GSLP driver, is the
+  core of the solver. The solver aims to create a good VectorPackSet for
+  later code generation, using planning and heuristics. The construction of a
+  VectorPackSet is simple, but the codegen method is complex. The only
+  interaction between the solver and the VectorPackSet is the tryAdd method,
+  which checks the compatibility of the VectorPack to be added and updates
+  the PackedValues, AllPacks, and ValueToPackMap.
 
   The main logic of the solver is implemented in another optimizeBottomUp
   function, which is overloaded with Packer and SeedOperands as parameters
@@ -22,13 +21,66 @@
   <section|getSeedMemPacks>
 
   The load/store directed acyclic graph (DAG) represents the dependencies
-  between low and high address memory accesses. The <code*|getSeedMemPacks>
-  function extracts consecutive load or store operations from the access DAG,
-  which maps each memory access instruction to its preceding instructions.
-  The behavior of the <code*|Enumerate> lambda function, specifically how it
-  maintains the order of seed packs while checking for loop dependencies and
+  between low and high address memory accesses. The getSeedMemPacks function
+  extracts consecutive load or store operations from the access DAG, which
+  maps each memory access instruction to its preceding instructions. The
+  behavior of the Enumerate lambda function, specifically how it maintains
+  the order of seed packs while checking for loop dependencies and
   independence, remains unclear. Evidence suggests that the access order
   might not be strictly preserved.
+
+  The standalone enumerate function finds no application within the VeGen.
+
+  <section|runBottomUpFromOperand>
+
+  Despite its name implying bottom-up processing, this function implements a
+  depth-first search on the vector intermediate representation (VeGen's
+  vector IR). While it doesn't explicitly return a value, it directly
+  incorporates identified vector packs into the program plan. Notably, a
+  heuristic module is employed to locate the immediate vector packs
+  generating the current operand.
+
+  Note that the Plan does not simply store VectorPacks. More importantly, it
+  calculates the costs associated with added VectorPacks, considering both
+  their vector and scalar usage.
+
+  <section|Operand Pack Manipulation>
+
+  Three functions, deinterleave, concat, and interleave, specifically
+  manipulate OperandPacks. Their functionalities are relatively
+  straightforward. It's crucial to remember that ownership of both
+  OperandPacks and VectorPacks resides with the VectorPackContext.
+
+  <section|Back-Edge Packs>
+
+  The getBackEdgePacks function accepts three arguments: a Packer pointer, a
+  Plan reference, and a SmallPtrSet reference that contains ConditionPack
+  pointers. This function collects the back-edge condition packs for the
+  value packs from divergent loops in the plan. The divergent loops result
+  from coiterating several loops.
+
+  <\itemize>
+    <item>Back-edge condition is a control condition that determines whether
+    a loop will iterate again or exit.
+
+    <item>Divergent loop is a loop that has different trip counts for
+    different vector lanes.
+
+    <item>Trip count is the number of times a loop iterates.
+
+    <item>Vector lane is a scalar element of a vector value.
+  </itemize>
+
+  <section|Find Loop-Free Reductions>
+
+  In addition to store instructions, the reduction variables in a loop should
+  also be the seeds of the bottom-up optimization process. How can we find
+  them? The findLoopFreeReductions function starts with the operands of the
+  call and invoke instructions (a call instruction is an invoke instruction
+  without exception handling) and checks only integer and floating-point
+  types. It performs pattern matching on such a scalar (either integer or
+  floating-point), computes the dependency of the reduction chain, and
+  creates a reduction vector pack and adds it to the seeds.
 
   <section|optimizeBottomUp>
 
@@ -98,18 +150,15 @@
 
   <section|Plan: VeGen's VPlan>
 
-  A VPlan consists of a Packer object, a Cost value, and a VectorPackSet. A
-  VectorPackSet maps each Value to a VectorPack, which is a group of scalar
-  values packed into a vector register. A VPlan also maintains three
-  additional maps: Instruction to VectorPackSlot, Instruction to
-  OperandPackSet, and Value to VectorPack. These maps help the VPlan to
-  estimate the cost of vectorization based on the number and type of
+  The Plan of VeGen comprises a Packer object, a Cost value, and a
+  VectorPackSet. A VectorPackSet assigns each Value to a VectorPack, which is
+  a collection of scalar values in a vector register. The Plan also keeps
+  three additional maps: Instruction to VectorPackSlot, Instruction to
+  OperandPackSet, and Value to VectorPack. These maps enable VeGen to
+  estimate the vectorization cost based on the number and type of
   OperandPacks and Instructions.
 
   <section|improvePlan>
-
-  The function name is somehow misleading, since originally there is no plan
-  at all. It is improvePlan that plans from the beginning.
 
   <subsection|Seeds>
 
@@ -321,19 +370,6 @@
     Values array, which is assigned to a local variable named N. This loop
     will split the store pack into smaller chunks of size VL.
   </itemize-dot>
-
-  <subsubsection|tryPackBackEdgeConds>
-
-  The getBackEdgePacks function takes three parameters: a pointer to a
-  Packer, a reference to a Plan, and a reference to a SmallPtrSet of
-  ConditionPack pointers. The purpose of this function is to collect all the
-  back-edge condition packs for packs of values from divergent loops in the
-  plan.
-
-  A back-edge condition is a control condition that determines whether a loop
-  will iterate again or exit. A divergent loop is a loop that has different
-  trip counts for different vector lanes. A trip count is the number of times
-  a loop iterates. A vector lane is a scalar element of a vector value.
 </body>
 
 <\initial>
@@ -348,61 +384,80 @@
 <\references>
   <\collection>
     <associate|auto-1|<tuple|1|1>>
-    <associate|auto-10|<tuple|4.1.5|5>>
-    <associate|auto-11|<tuple|4.1.6|?>>
-    <associate|auto-2|<tuple|2|2>>
-    <associate|auto-3|<tuple|3|2>>
-    <associate|auto-4|<tuple|4|2>>
-    <associate|auto-5|<tuple|4.1|2>>
-    <associate|auto-6|<tuple|4.1.1|2>>
-    <associate|auto-7|<tuple|4.1.2|2>>
-    <associate|auto-8|<tuple|4.1.3|3>>
-    <associate|auto-9|<tuple|4.1.4|4>>
+    <associate|auto-10|<tuple|8.1.1|3>>
+    <associate|auto-11|<tuple|8.1.2|3>>
+    <associate|auto-12|<tuple|8.1.3|3>>
+    <associate|auto-13|<tuple|8.1.4|4>>
+    <associate|auto-14|<tuple|8.1.5|5>>
+    <associate|auto-2|<tuple|2|1>>
+    <associate|auto-3|<tuple|3|1>>
+    <associate|auto-4|<tuple|4|1>>
+    <associate|auto-5|<tuple|5|2>>
+    <associate|auto-6|<tuple|6|2>>
+    <associate|auto-7|<tuple|7|3>>
+    <associate|auto-8|<tuple|8|3>>
+    <associate|auto-9|<tuple|8.1|3>>
   </collection>
 </references>
 
 <\auxiliary>
   <\collection>
     <\associate|toc>
-      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|1<space|2spc>optimizeBottomUp>
+      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|1<space|2spc>getSeedMemPacks>
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-1><vspace|0.5fn>
 
-      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|2<space|2spc>Plan:
-      VeGen's VPlan> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|2<space|2spc>runBottomUpFromOperand>
+      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-2><vspace|0.5fn>
 
-      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|3<space|2spc>improvePlan>
-      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|3<space|2spc>Operand
+      Pack Manipulation> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-3><vspace|0.5fn>
 
-      <with|par-left|<quote|1tab>|3.1<space|2spc>Seeds
-      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-4>>
+      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|4<space|2spc>Back-Edge
+      Packs> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-4><vspace|0.5fn>
 
-      <with|par-left|<quote|2tab>|3.1.1<space|2spc>Store Packs
-      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-5>>
+      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|5<space|2spc>Find
+      Loop-Free Reductions> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-5><vspace|0.5fn>
 
-      <with|par-left|<quote|2tab>|3.1.2<space|2spc>Loop-Reduction Packs
+      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|6<space|2spc>optimizeBottomUp>
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-6>>
+      <no-break><pageref|auto-6><vspace|0.5fn>
 
-      <with|par-left|<quote|2tab>|3.1.3<space|2spc>Heuristic
+      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|7<space|2spc>Plan:
+      VeGen's VPlan> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-7><vspace|0.5fn>
+
+      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|8<space|2spc>improvePlan>
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-7>>
+      <no-break><pageref|auto-8><vspace|0.5fn>
 
-      <with|par-left|<quote|2tab>|3.1.4<space|2spc>runBottomUpFromOperand
-      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-8>>
-
-      <with|par-left|<quote|2tab>|3.1.5<space|2spc>Decomposed Stores
+      <with|par-left|<quote|1tab>|8.1<space|2spc>Seeds
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-9>>
 
-      <with|par-left|<quote|2tab>|3.1.6<space|2spc>tryPackBackEdgeConds
+      <with|par-left|<quote|2tab>|8.1.1<space|2spc>Store Packs
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-10>>
+
+      <with|par-left|<quote|2tab>|8.1.2<space|2spc>Loop-Reduction Packs
+      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-11>>
+
+      <with|par-left|<quote|2tab>|8.1.3<space|2spc>Heuristic
+      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-12>>
+
+      <with|par-left|<quote|2tab>|8.1.4<space|2spc>runBottomUpFromOperand
+      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-13>>
+
+      <with|par-left|<quote|2tab>|8.1.5<space|2spc>Decomposed Stores
+      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-14>>
     </associate>
   </collection>
 </auxiliary>
