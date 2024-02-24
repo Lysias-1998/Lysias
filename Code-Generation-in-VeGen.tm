@@ -7,15 +7,22 @@
 
   <doc-data|<doc-title|Code Generation in VeGen>>
 
+  The codegen does not generate new code, but rewrites the existing code.
+  Specifically, it creates new basic blocks, inserts the vectorized code,
+  adds the new blocks to the LLVM IR module, and then deletes the old blocks
+  from the LLVM IR module.
+
   <section|VectorPackSet::codegen>
 
   VectorPackSet has a method called codegen. The method takes two parameters:
   a Builder and Paker (Pkr).
 
-  <\itemize-dot>
-    <item>If AllPacks is not empty, print \PVectorized\Q and the name of the
-    function from Pkr.
+  The codegen does not generate new code, but rewrites the existing code.
+  Specifically, it creates new basic blocks, inserts the vectorized code,
+  adds the new blocks to the LLVM IR module, and then deletes the old blocks
+  from the LLVM IR module.
 
+  <\itemize-dot>
     <item>For each VP in AllPacks, and for each pair of instructions in VP,
     fuse or co-iterate their loops.
 
@@ -36,10 +43,21 @@
     conditions.
   </itemize-dot>
 
-  <subsection|Condition Reify>
+  <subsection|Co-iteration>
 
-  is reify a operation to the control flow? if it is, why the operation is
-  done in codegen? or why must it done in codegen?
+  {coiteration immediately change the code or just mark it?}
+
+  <subsection|Reifier>
+
+  To perform control dependency analysis, VeGen crafts its own infrastructure
+  instead of using the one in LLVM. It defines dedicated data structures to
+  represent control flow as a chain of branch conditions, which aids control
+  dependence analysis. Through this chain of block conditions, VeGen can
+  generate a graph of basic blocks to reflect this condition representation,
+  and generate actual boolean expressions and branch instructions according
+  to the representation. This component is called Reifier. Reifier also
+  caches the generated results, which are LLVM IR reflecting the
+  representation, one cache per VLoop.
 
   <section|VectorCodeGen>
 
@@ -48,22 +66,20 @@
 
   <subsection|emit loop>
 
-  The function emitLoop lowers a VLoop and returns the loop-header and exit
-  blocks. It takes a VLoop and a BasicBlock as parameters, and returns a pair
-  of BasicBlocks, which are the Header and the Exit blocks.\ 
-
-  At the beginning, emitLoop <em|creates three blocks> and one instruction: a
+  The emitLoop function lowers a VLoop to a pair of BasicBlocks: the Header
+  and the Exit blocks. It takes a VLoop and a pre-header BasicBlock as
+  parameters. The pre-header BasicBlock is the insertion point for the loop.
+  The emitLoop function also creates three blocks and one instruction: a
   Header, a Latch, and an Exit block, and a Branch instruction. The Latch
-  block will be wired with the Exit and Header blocks later.
-
-  In VeGen, the top-level loop has the Header block as the entry block.
+  block connects to the Exit and Header blocks. The Header block is the entry
+  block for the top-level loop in VeGen.
 
   The following steps are performed to generate the code for the loop:
 
-  <\itemize-minus>
+  <\itemize-arrow>
     <item>Schedule the instructions and loops according to data dependence.
 
-    <item>Pick out the reduction packs, which will be emitted last.
+    <item>Pick out the <em|reduction packs>, which will be emitted last.
 
     <item>Generate code according to the schedule.
 
@@ -75,14 +91,13 @@
     <item>Record guarded live outs.
 
     <item>Return the Header and the Exit.
-  </itemize-minus>
-
-  (When is normal scalar or vector code inserted into the new basic block?)
+  </itemize-arrow>
 </body>
 
 <\initial>
   <\collection>
     <associate|page-medium|paper>
+    <associate|preamble|false>
   </collection>
 </initial>
 
@@ -90,8 +105,9 @@
   <\collection>
     <associate|auto-1|<tuple|1|1>>
     <associate|auto-2|<tuple|1.1|1>>
-    <associate|auto-3|<tuple|2|1>>
-    <associate|auto-4|<tuple|2.1|1>>
+    <associate|auto-3|<tuple|1.2|1>>
+    <associate|auto-4|<tuple|2|1>>
+    <associate|auto-5|<tuple|2.1|2>>
   </collection>
 </references>
 
@@ -102,17 +118,21 @@
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-1><vspace|0.5fn>
 
-      <with|par-left|<quote|1tab>|1.1<space|2spc>Condition Reify
+      <with|par-left|<quote|1tab>|1.1<space|2spc>Co-iteration
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-2>>
 
+      <with|par-left|<quote|1tab>|1.2<space|2spc>Reifier
+      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-3>>
+
       <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|2<space|2spc>VectorCodeGen>
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-3><vspace|0.5fn>
+      <no-break><pageref|auto-4><vspace|0.5fn>
 
       <with|par-left|<quote|1tab>|2.1<space|2spc>emit loop
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-4>>
+      <no-break><pageref|auto-5>>
     </associate>
   </collection>
 </auxiliary>
