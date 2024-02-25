@@ -1,15 +1,9 @@
-<TeXmacs|2.1.4>
+<TeXmacs|2.1.2>
 
 <style|generic>
 
 <\body>
   <doc-data|<doc-title|VLoop in VeGen>>
-
-  <section|Loop Related Files>
-
-  There are three groups of files that are directly related to loops in
-  VeGen: Vloop, LoopUnrolling, and UnrollFactor. Each group has a header file
-  and a cpp file.
 
   <section|VLoop>
 
@@ -81,18 +75,38 @@
   For example, VLoop defined by VeGen contains not only a reference to LLVM
   loop and instructions, but also holds dependent analysis results as bit
   vectors for instructions in the loop and instructions the loop depends on.
-  When fusing two loops, these analyses are updated with fusing. This again
-  makes me think that LLVM project has a clear design.
+  When fusing two loops, these analyses are updated with fusing.
 
   After fusing, VL2 is added to the deleted loops of VLoopInfo, and erased
-  from the common parent's subloops.
+  from the common parent's subloops. All the editing operations affect only
+  the VLoop structure itself and the bookkeeping structures in VLoopInfo, not
+  the underlying LLVM IR.
 
   <subsubsection|coiterate>
 
-  VLoopInfo uses an EquivalenceClasses (union-find) ADT to store co-iterated
-  loops.
+  VLoopInfo uses an EquivalenceClasses (union-find) abstract data type (ADT)
+  to store co-iterated loops. The function VLoopInfo::coiterate marks two
+  loops and their parent loops as \Pcoiterating loops\Q in the equivalence
+  class.
 
-  Coiteration operates on the leaders of the EquivalenceClasses.
+  <section|VLoopInfo::doCoiteration>
+
+  This function visits every leading VLoop in the coiterating-loops of
+  VLoopInfo. The leading VLoop must have more than one member to fuse.
+
+  The function doCoiteration defines a recursive Visit function and calls it
+  on the leaders in the coiterating loop set. When visiting such a leader
+  loop, it first makes sure it has not been visited (if visited, skip it).
+  Since we cannot fuse two nested loops before fusing their parent loops,
+  this function will coiterate the parents if necessary.
+
+  <subsection|Transform>
+
+  The code is a function that transforms a loop to add active guards and
+  guard the live-outs. Active guards are conditions that determine whether a
+  loop iteration should be executed or not, based on the vectorization factor
+  and the loop trip count. Live-outs are values that are defined inside the
+  loop and used outside the loop.
 
   <section|LoopUnrolling>
 
@@ -370,67 +384,69 @@
 <\references>
   <\collection>
     <associate|auto-1|<tuple|1|1>>
-    <associate|auto-10|<tuple|3|2>>
-    <associate|auto-11|<tuple|3.1|2>>
-    <associate|auto-12|<tuple|3.2|2>>
-    <associate|auto-13|<tuple|3.3|2>>
-    <associate|auto-14|<tuple|3.3.1|2>>
-    <associate|auto-15|<tuple|3.3.2|3>>
-    <associate|auto-16|<tuple|3.3.3|3>>
-    <associate|auto-17|<tuple|3.3.4|4>>
-    <associate|auto-18|<tuple|4|4>>
-    <associate|auto-19|<tuple|4.1|4>>
-    <associate|auto-2|<tuple|2|1>>
-    <associate|auto-20|<tuple|4.2|4>>
-    <associate|auto-21|<tuple|4.3|4>>
-    <associate|auto-3|<tuple|2.1|1>>
-    <associate|auto-4|<tuple|2.2|1>>
-    <associate|auto-5|<tuple|2.2.1|1>>
-    <associate|auto-6|<tuple|2.2.2|1>>
-    <associate|auto-7|<tuple|2.2.3|1>>
-    <associate|auto-8|<tuple|2.2.4|2>>
-    <associate|auto-9|<tuple|2.2.5|2>>
+    <associate|auto-10|<tuple|2.1|2>>
+    <associate|auto-11|<tuple|3|2>>
+    <associate|auto-12|<tuple|3.1|2>>
+    <associate|auto-13|<tuple|3.2|2>>
+    <associate|auto-14|<tuple|3.3|2>>
+    <associate|auto-15|<tuple|3.3.1|3>>
+    <associate|auto-16|<tuple|3.3.2|3>>
+    <associate|auto-17|<tuple|3.3.3|4>>
+    <associate|auto-18|<tuple|3.3.4|4>>
+    <associate|auto-19|<tuple|4|4>>
+    <associate|auto-2|<tuple|1.1|1>>
+    <associate|auto-20|<tuple|4.1|4>>
+    <associate|auto-21|<tuple|4.2|4>>
+    <associate|auto-22|<tuple|4.3|?>>
+    <associate|auto-23|<tuple|4.3|?>>
+    <associate|auto-3|<tuple|1.2|1>>
+    <associate|auto-4|<tuple|1.2.1|1>>
+    <associate|auto-5|<tuple|1.2.2|1>>
+    <associate|auto-6|<tuple|1.2.3|1>>
+    <associate|auto-7|<tuple|1.2.4|1>>
+    <associate|auto-8|<tuple|1.2.5|2>>
+    <associate|auto-9|<tuple|2|2>>
   </collection>
 </references>
 
 <\auxiliary>
   <\collection>
     <\associate|toc>
-      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|1<space|2spc>Loop
-      Related Files> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|1<space|2spc>VLoop>
+      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-1><vspace|0.5fn>
 
-      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|2<space|2spc>VLoop>
+      <with|par-left|<quote|1tab>|1.1<space|2spc>Members
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-2><vspace|0.5fn>
+      <no-break><pageref|auto-2>>
 
-      <with|par-left|<quote|1tab>|2.1<space|2spc>Members
+      <with|par-left|<quote|1tab>|1.2<space|2spc>Methods
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-3>>
 
-      <with|par-left|<quote|1tab>|2.2<space|2spc>Methods
+      <with|par-left|<quote|2tab>|1.2.1<space|2spc>haveIdenticalTripCounts
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-4>>
 
-      <with|par-left|<quote|2tab>|2.2.1<space|2spc>haveIdenticalTripCounts
+      <with|par-left|<quote|2tab>|1.2.2<space|2spc>isSafeToFuse
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-5>>
 
-      <with|par-left|<quote|2tab>|2.2.2<space|2spc>isSafeToFuse
+      <with|par-left|<quote|2tab>|1.2.3<space|2spc>isSafeToCoIterate
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-6>>
 
-      <with|par-left|<quote|2tab>|2.2.3<space|2spc>isSafeToCoIterate
+      <with|par-left|<quote|2tab>|1.2.4<space|2spc>fuse
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-7>>
 
-      <with|par-left|<quote|2tab>|2.2.4<space|2spc>fuse
+      <with|par-left|<quote|2tab>|1.2.5<space|2spc>coiterate
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-8>>
 
-      <with|par-left|<quote|2tab>|2.2.5<space|2spc>coiterate
+      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|2<space|2spc>VLoopInfo::doCoiteration>
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-9>>
+      <no-break><pageref|auto-9><vspace|0.5fn>
 
       <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|3<space|2spc>LoopUnrolling>
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
